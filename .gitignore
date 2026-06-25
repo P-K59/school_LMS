@@ -1,0 +1,13 @@
+# Documentation
+PRD.md
+DESIGN (1).md
+
+# Node
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# VS Code
+.vscode/
