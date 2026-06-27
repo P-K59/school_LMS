@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   School,
@@ -32,9 +32,16 @@ const navItems = [
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
+
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    sessionStorage.removeItem("superadmin_logged_in");
+    router.push("/superadmin");
+  };
 
   return (
     <>
@@ -132,13 +139,13 @@ export const Sidebar: React.FC = () => {
               <p className="text-sm font-semibold text-white truncate">Platform Master</p>
               <p className="text-[11px] text-slate-500 font-geist truncate">owner@eduverse.io</p>
             </div>
-            <Link
-              href="/"
-              title="Return to Hub"
-              className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-950/20 rounded-lg transition-colors"
+            <button
+              onClick={handleLogout}
+              title="End Session"
+              className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-950/20 rounded-lg transition-colors focus:outline-none cursor-pointer"
             >
               <LogOut size={16} />
-            </Link>
+            </button>
           </div>
         </div>
       </aside>

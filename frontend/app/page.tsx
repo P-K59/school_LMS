@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, School, BookOpen, KeyRound } from "lucide-react";
+import { School, BookOpen } from "lucide-react";
 
 export default function Home() {
   return (
@@ -38,26 +38,7 @@ export default function Home() {
         </p>
 
         {/* Portal Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full max-w-4xl">
-          {/* Card 1: Super Admin Gateway */}
-          <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-900 hover:border-slate-800/80 hover:bg-slate-900/60 transition-all duration-300 flex flex-col justify-between text-left group">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4">
-                <ShieldCheck size={20} />
-              </div>
-              <h3 className="text-base font-bold text-white leading-snug">Super Admin Dashboard</h3>
-              <p className="text-xs text-slate-450 mt-1.5 leading-relaxed font-medium">
-                Full platform-level control. Access schools registrar, change licensing prices, write global announcements, and read revenue charts.
-              </p>
-            </div>
-            <Link
-              href="/superadmin/dashboard"
-              className="mt-6 flex items-center justify-between text-xs font-bold text-indigo-400 group-hover:text-indigo-300 transition-colors"
-            >
-              Access Portal <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12 w-full max-w-3xl">
           {/* Card 2: School Admin Panel */}
           <div className="p-6 rounded-2xl bg-slate-900/20 border border-slate-900/60 opacity-60 flex flex-col justify-between text-left select-none relative">
             <span className="absolute top-4 right-4 text-[9px] font-bold font-geist bg-slate-900 border border-slate-800 text-slate-500 px-2 py-0.5 rounded-full">
@@ -68,7 +49,7 @@ export default function Home() {
                 <School size={20} />
               </div>
               <h3 className="text-base font-bold text-slate-400 leading-snug">School Admin Panel</h3>
-              <p className="text-xs text-slate-550 mt-1.5 leading-relaxed">
+              <p className="text-xs text-slate-550 mt-1.5 leading-relaxed font-medium">
                 Manage your specific school, assign teachers, monitor your students, and organize class timetables.
               </p>
             </div>
@@ -87,7 +68,7 @@ export default function Home() {
                 <BookOpen size={20} />
               </div>
               <h3 className="text-base font-bold text-slate-400 leading-snug">Student Hub Portal</h3>
-              <p className="text-xs text-slate-550 mt-1.5 leading-relaxed">
+              <p className="text-xs text-slate-550 mt-1.5 leading-relaxed font-medium">
                 Watch lecture videos, take dynamic module quizzes, and view personal progress performance certificates.
               </p>
             </div>
@@ -104,8 +85,6 @@ export default function Home() {
           &copy; 2026 EduVerse LMS Inc. All systems normal.
         </p>
         <div className="flex items-center gap-4 text-xs font-geist text-slate-500">
-          <Link href="/superadmin/dashboard" className="hover:text-indigo-400 transition-colors">Superadmin Login</Link>
-          <span className="text-slate-800">|</span>
           <span>Terms of Licensing</span>
         </div>
       </footer>
