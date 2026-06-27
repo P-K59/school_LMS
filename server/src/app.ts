@@ -22,8 +22,11 @@ app.use(cors({
 
 // importing routes
 import authRoutes from "./routes/auth.routes";
+import schoolAdminRoutes from "./routes/schoolAdmin.routes";
+import { errorHandler } from "./middlewares/error.middleware";
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/school-admin", schoolAdminRoutes);
 
 
 
@@ -52,3 +55,7 @@ app.all(
     });
   }
 );
+
+// global error handler
+app.use(errorHandler);
+

@@ -40,42 +40,48 @@ export default function Home() {
         {/* Portal Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12 w-full max-w-3xl">
           {/* Card 2: School Admin Panel */}
-          <div className="p-6 rounded-2xl bg-slate-900/20 border border-slate-900/60 opacity-60 flex flex-col justify-between text-left select-none relative">
-            <span className="absolute top-4 right-4 text-[9px] font-bold font-geist bg-slate-900 border border-slate-800 text-slate-500 px-2 py-0.5 rounded-full">
-              INTERN 3
+          <Link
+            href="/auth/school-admin-login"
+            className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-900/60 transition-all duration-300 flex flex-col justify-between text-left relative group cursor-pointer"
+          >
+            <span className="absolute top-4 right-4 text-[9px] font-bold font-geist bg-indigo-950 text-indigo-400 border border-indigo-900/50 px-2 py-0.5 rounded-full">
+              ACTIVE
             </span>
             <div>
-              <div className="w-10 h-10 rounded-xl bg-slate-800/20 border border-slate-800/30 flex items-center justify-center text-slate-500 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition-all">
                 <School size={20} />
               </div>
-              <h3 className="text-base font-bold text-slate-400 leading-snug">School Admin Panel</h3>
-              <p className="text-xs text-slate-550 mt-1.5 leading-relaxed font-medium">
-                Manage your specific school, assign teachers, monitor your students, and organize class timetables.
+              <h3 className="text-base font-bold text-white leading-snug">School Admin Panel</h3>
+              <p className="text-xs text-slate-400 mt-1.5 leading-relaxed font-medium">
+                Manage student registries, assign teachers, monitor attendance, process fee payments, and view school analytics.
               </p>
             </div>
-            <span className="mt-6 flex items-center justify-between text-xs font-bold text-slate-600">
-              Restricted Module
+            <span className="mt-6 flex items-center justify-between text-xs font-bold text-indigo-400 group-hover:translate-x-1 transition-transform">
+              Access Portal Dashboard &rarr;
             </span>
-          </div>
+          </Link>
 
           {/* Card 3: Student Portal */}
-          <div className="p-6 rounded-2xl bg-slate-900/20 border border-slate-900/60 opacity-60 flex flex-col justify-between text-left select-none relative">
-            <span className="absolute top-4 right-4 text-[9px] font-bold font-geist bg-slate-900 border border-slate-800 text-slate-500 px-2 py-0.5 rounded-full">
-              INTERN 4
+          <Link
+            href="/auth/student-login"
+            className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-pink-500/50 hover:bg-slate-900/60 transition-all duration-300 flex flex-col justify-between text-left relative group cursor-pointer"
+          >
+            <span className="absolute top-4 right-4 text-[9px] font-bold font-geist bg-pink-950 text-pink-400 border border-pink-900/50 px-2 py-0.5 rounded-full">
+              ACTIVE
             </span>
             <div>
-              <div className="w-10 h-10 rounded-xl bg-slate-800/20 border border-slate-800/30 flex items-center justify-center text-slate-500 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 mb-4 group-hover:scale-110 transition-all">
                 <BookOpen size={20} />
               </div>
-              <h3 className="text-base font-bold text-slate-400 leading-snug">Student Hub Portal</h3>
-              <p className="text-xs text-slate-550 mt-1.5 leading-relaxed font-medium">
+              <h3 className="text-base font-bold text-white leading-snug">Student Hub Portal</h3>
+              <p className="text-xs text-slate-400 mt-1.5 leading-relaxed font-medium">
                 Watch lecture videos, take dynamic module quizzes, and view personal progress performance certificates.
               </p>
             </div>
-            <span className="mt-6 flex items-center justify-between text-xs font-bold text-slate-600">
-              Restricted Module
+            <span className="mt-6 flex items-center justify-between text-xs font-bold text-pink-400 group-hover:translate-x-1 transition-transform">
+              Access Student Hub &rarr;
             </span>
-          </div>
+          </Link>
         </div>
       </main>
 
