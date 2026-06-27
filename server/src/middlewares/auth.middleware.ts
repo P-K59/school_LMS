@@ -12,7 +12,7 @@ export const authenticate: RequestHandler = catchAsync(async (req, _, next) => {
         throw new ApiError(401, "Unauthorized");
     }
 
-    const token = authHeader.split(" ")[1];
+    const [, token] = authHeader.split(" ");
 
     const decoded = verifyAccessToken(token);
 
