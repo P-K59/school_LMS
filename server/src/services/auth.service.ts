@@ -124,6 +124,10 @@ class AuthService {
     // @access Public
     async login(data: LoginDto) {
 
+        if (data.email === "admin@apexedu.com" || data.email === "student@apexedu.com") {
+            await this.ensureDemoSeeded();
+        }
+
         // Check if user already exists
         const user = await prisma.user.findUnique({
             where: {
@@ -215,7 +219,31 @@ class AuthService {
                 id: userId,
             },
             include:{
-                school:true
+                school:true,
+                student: {
+                    include: {
+                        class: true,
+                        section: true,
+                        parent: true,
+                        fees: {
+                            include: {
+                                feeStructure: true
+                            }
+                        },
+                        attendances: true,
+                        bookIssues: {
+                            include: {
+                                book: true
+                            }
+                        },
+                        transport: {
+                            include: {
+                                route: true,
+                                stop: true
+                            }
+                        }
+                    }
+                }
             }
         });
 
@@ -245,6 +273,162 @@ class AuthService {
     }
 
     async changePassword() { }
+
+    async ensureDemoSeeded() {
+        const slug = "apex-international-school";
+        
+        // 1. Check if school exists
+        let school = await prisma.school.findUnique({
+            where: { slug }
+        });
+
+        if (!school) {
+            school = await prisma.school.create({
+                data: {
+                    name: "Apex International School",
+                    slug,
+                    email: "contact@apexedu.com",
+                    phone: "9876543210",
+                }
+            });
+        }
+
+        const hashedPassword = await hashPassword("password123");
+
+        // 2. Check if admin user exists
+        let admin = await prisma.user.findUnique({
+            where: { email: "admin@apexedu.com" }
+        });
+
+        if (!admin) {
+            admin = await prisma.user.create({
+                data: {
+                    schoolId: school.id,
+                    firstName: "Principal",
+                    lastName: "Apex",
+                    email: "admin@apexedu.com",
+                    password: hashedPassword,
+                    phone: "9876543210",
+                    role: UserRole.SCHOOL_ADMIN,
+                }
+            });
+        }
+
+        // 3. Check if academic year exists
+        let academicYear = await prisma.academicYear.findFirst({
+            where: { schoolId: school.id }
+        });
+
+        if (!academicYear) {
+            academicYear = await prisma.academicYear.create({
+                data: {
+                    schoolId: school.id,
+                    name: "2026-2027",
+                    startDate: new Date("2026-06-01"),
+                    endDate: new Date("2027-05-31"),
+                    isCurrent: true,
+                }
+            });
+        }
+
+        // 4. Check if class exists
+        let cls = await prisma.class.findFirst({
+            where: { schoolId: school.id }
+        });
+
+        if (!cls) {
+            cls = await prisma.class.create({
+                data: {
+                    schoolId: school.id,
+                    academicYearId: academicYear.id,
+                    name: "Grade 5",
+                    description: "Demo Grade 5 Class",
+                }
+            });
+        }
+
+        // 5. Check if section exists
+        let section = await prisma.section.findFirst({
+            where: { classId: cls.id }
+        });
+
+        if (!section) {
+            section = await prisma.section.create({
+                data: {
+                    classId: cls.id,
+                    name: "Section A",
+                }
+            });
+        }
+
+        // 6. Check if parent exists
+        let parentUser = await prisma.user.findUnique({
+            where: { email: "parent@apexedu.com" }
+        });
+
+        if (!parentUser) {
+            parentUser = await prisma.user.create({
+                data: {
+                    schoolId: school.id,
+                    firstName: "Parent",
+                    lastName: "Apex",
+                    email: "parent@apexedu.com",
+                    password: hashedPassword,
+                    phone: "9876543210",
+                    role: UserRole.PARENT,
+                }
+            });
+
+            await prisma.parent.create({
+                data: {
+                    userId: parentUser.id,
+                    schoolId: school.id,
+                    fatherName: "Parent Apex",
+                    phone: "9876543210",
+                    email: "parent@apexedu.com",
+                }
+            });
+        }
+
+        // 7. Check if student exists
+        let studentUser = await prisma.user.findUnique({
+            where: { email: "student@apexedu.com" }
+        });
+
+        if (!studentUser) {
+            studentUser = await prisma.user.create({
+                data: {
+                    schoolId: school.id,
+                    firstName: "Demo",
+                    lastName: "Student",
+                    email: "student@apexedu.com",
+                    password: hashedPassword,
+                    phone: "9876543210",
+                    role: UserRole.STUDENT,
+                }
+            });
+
+            const parent = await prisma.parent.findFirst({
+                where: { schoolId: school.id }
+            });
+
+            await prisma.student.create({
+                data: {
+                    userId: studentUser.id,
+                    parentId: parent!.id,
+                    schoolId: school.id,
+                    classId: cls.id,
+                    sectionId: section.id,
+                    admissionNumber: "ADM-2026-001",
+                    rollNumber: "01",
+                    firstName: "Demo",
+                    lastName: "Student",
+                    gender: "MALE",
+                    dob: new Date("2016-01-01"),
+                }
+            });
+        }
+    }
 }
 
 export default new AuthService();
