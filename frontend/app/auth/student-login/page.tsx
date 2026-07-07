@@ -3,9 +3,13 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, BookOpen, ArrowRight, Sparkles, User, Smile } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { api } from "../../lib/api";
+import { tokenService } from "../../lib/token";
 
 export default function StudentLogin() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,25 +23,8 @@ export default function StudentLogin() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Invalid credentials.");
-      }
-
-      localStorage.setItem("token", data.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
-      localStorage.setItem("school", JSON.stringify(data.data.school));
-
+      await login(email, password);
       setMessage("Welcome back! Loading your learning dashboard...");
-      setTimeout(() => {
-        router.push("/student/dashboard");
-      }, 800);
     } catch (err: any) {
       setError(err.message || "Failed to establish a secure connection.");
       setIsLoading(false);
@@ -51,31 +38,11 @@ export default function StudentLogin() {
 
     try {
       setMessage("Initializing learning sandbox...");
-      const response = await fetch("http://localhost:8000/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: "student@apexedu.com",
-          password: "password123",
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Demo login failed.");
-      }
-
-      localStorage.setItem("token", data.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
-      localStorage.setItem("school", JSON.stringify(data.data.school));
-
+      await login("student@apexedu.com", "password123");
+      
       setEmail("student@apexedu.com");
       setPassword("password123");
       setMessage("Awesome! Welcome to your student portal!");
-
-      setTimeout(() => {
-        router.push("/student/dashboard");
-      }, 1000);
     } catch (err: any) {
       setError(err.message || "Failed to run automated demo login.");
       setIsLoading(false);

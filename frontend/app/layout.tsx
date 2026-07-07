@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "./context/AuthContext";
 
 export const metadata: Metadata = {
   title: "EduVerse LMS - Super Admin Dashboard",
@@ -16,7 +17,11 @@ export default function RootLayout({
       lang="en"
       className="h-full antialiased"
     >
-      <body className="min-h-full flex flex-col bg-surface font-inter text-on-surface">{children}</body>
+      <body className="min-h-full flex flex-col bg-surface font-inter text-on-surface">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

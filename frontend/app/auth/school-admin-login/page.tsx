@@ -3,9 +3,14 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, ShieldCheck, Terminal, AlertCircle, ArrowRight, Sparkles } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { api } from "../../lib/api";
+import { tokenService } from "../../lib/token";
+import Link from "next/link";
 
 export default function SchoolAdminLogin() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,25 +24,8 @@ export default function SchoolAdminLogin() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Invalid credentials.");
-      }
-
-      localStorage.setItem("token", data.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
-      localStorage.setItem("school", JSON.stringify(data.data.school));
-
+      await login(email, password);
       setMessage("Session authenticated successfully! Accessing panel...");
-      setTimeout(() => {
-        router.push("/school-admin/dashboard");
-      }, 800);
     } catch (err: any) {
       setError(err.message || "Failed to establish a secure connection.");
       setIsLoading(false);
@@ -62,28 +50,22 @@ export default function SchoolAdminLogin() {
 
     try {
       setMessage("Registering Demo School Tenant...");
-      const registerRes = await fetch("http://localhost:8000/api/v1/auth/register-school", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(demoPayload),
-      });
+      const regData = await api.post("/auth/register-school", demoPayload);
 
-      const regData = await registerRes.json();
-      if (!registerRes.ok) {
+      if (regData.success && regData.data) {
+        const { accessToken, user: regUser, school: regSchool } = regData.data;
+        tokenService.setSession(accessToken, regUser, regSchool);
+
+        setEmail(demoPayload.email);
+        setPassword(demoPayload.password);
+        setMessage("School created! Loading dashboard... Enjoy the sandbox.");
+
+        setTimeout(() => {
+          router.push("/school-admin/dashboard");
+        }, 1000);
+      } else {
         throw new Error(regData.message || "Failed to register demo school.");
       }
-
-      localStorage.setItem("token", regData.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(regData.data.user));
-      localStorage.setItem("school", JSON.stringify(regData.data.school));
-
-      setEmail(demoPayload.email);
-      setPassword(demoPayload.password);
-      setMessage("School created! Loading dashboard... Enjoy the sandbox.");
-
-      setTimeout(() => {
-        router.push("/school-admin/dashboard");
-      }, 1000);
     } catch (err: any) {
       setError(err.message || "Failed to run automated onboarding.");
       setIsLoading(false);
@@ -202,6 +184,13 @@ export default function SchoolAdminLogin() {
                 )}
               </button>
             </form>
+
+            <div className="mt-4 text-center text-xs text-slate-400 font-medium">
+              Want to register a new school?{" "}
+              <Link href="/auth/register-school" className="text-indigo-400 hover:underline">
+                Register here
+              </Link>
+            </div>
 
             {/* Quick credentials banner */}
             <div className="mt-8 pt-6 border-t border-slate-900/60 flex flex-col items-center gap-3">

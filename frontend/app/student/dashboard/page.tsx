@@ -19,11 +19,11 @@ import {
   PlayCircle
 } from "lucide-react";
 
+import { useAuth } from "../../context/AuthContext";
+
 export default function StudentDashboard() {
   const router = useRouter();
-  const [studentData, setStudentData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user, school, isAuthenticated, isLoading, logout } = useAuth();
 
   // Gamified mock stats (as per the Intern 4 spec in the PDF)
   const [xp, setXp] = useState(280);
@@ -50,34 +50,16 @@ export default function StudentDashboard() {
   ];
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.get("/auth/me");
-      if (res.success && res.data) {
-        setStudentData(res.data);
-      } else {
-        throw new Error("Unable to load profile data.");
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to load student dashboard data.");
-    } finally {
-      setLoading(false);
+    if (!isLoading && !isAuthenticated) {
+      router.push("/auth/student-login");
     }
-  };
+  }, [isLoading, isAuthenticated, router]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("school");
-    router.push("/auth/student-login");
+    logout();
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
@@ -88,29 +70,15 @@ export default function StudentDashboard() {
     );
   }
 
-  if (error || !studentData) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-center">
-        <div className="max-w-md bg-slate-900 border border-slate-800 p-8 rounded-3xl space-y-4">
-          <Smile size={48} className="mx-auto text-rose-450 rotate-180" />
-          <h3 className="text-xl font-bold text-white">Oops, something went wrong!</h3>
-          <p className="text-xs text-slate-400">{error || "Failed to load student credentials."}</p>
-          <button 
-            onClick={handleLogout}
-            className="w-full py-2.5 px-4 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-semibold text-xs cursor-pointer transition-all"
-          >
-            Return to Login
-          </button>
-        </div>
-      </div>
-    );
+  if (!isAuthenticated || !user || !school) {
+    return null;
   }
 
-  const { user, school } = studentData;
-  const student = user.student || {};
+  const student = (user as any).student || {};
   const currentClass = student.class?.name || "N/A";
   const currentSection = student.section?.name || "N/A";
   const rollNo = student.rollNumber || "N/A";
+
   
   // Calculate attendance %
   const totalDays = student.attendances?.length || 0;

@@ -1,61 +1,55 @@
-const BASE_URL = "http://localhost:8000/api/v1";
+import axios from "axios";
+import { tokenService } from "./token";
 
-interface RequestOptions extends RequestInit {
-  body?: any;
-}
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 
-async function apiFetch(path: string, options: RequestOptions = {}) {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+});
 
-  const headers = new Headers(options.headers || {});
-  headers.append("Accept", "application/json");
-
-  // Only append content-type if not sending FormData
-  if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
-    headers.append("Content-Type", "application/json");
-  }
-
-  if (token) {
-    headers.append("Authorization", `Bearer ${token}`);
-  }
-
-  const fetchOptions: RequestInit = {
-    ...options,
-    headers,
-  };
-
-  if (options.body && !(options.body instanceof FormData)) {
-    fetchOptions.body = JSON.stringify(options.body);
-  }
-
-  const response = await fetch(`${BASE_URL}${path}`, fetchOptions);
-
-  if (response.status === 401) {
-    if (typeof window !== "undefined") {
-      const isStudentPath = window.location.pathname.startsWith("/student");
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = isStudentPath ? "/auth/student-login" : "/auth/school-admin-login";
+// Request Interceptor: Attach authorization Bearer token dynamically
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = tokenService.getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    throw new Error("Unauthorized session. Please log in again.");
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
+);
 
-  const resJson = await response.json();
+// Response Interceptor: Handle standard responses and 401 redirects
+axiosInstance.interceptors.response.use(
+  (response) => {
+    // The backend returns a standard wrapper: { success, statusCode, message, data }
+    return response.data;
+  },
+  (error) => {
+    const status = error.response?.status;
+    const resData = error.response?.data;
 
-  if (!response.ok) {
-    throw new Error(resJson.message || "An error occurred during api fetch request.");
+    // Handle session expiration/unauthorized states gracefully
+    if (status === 401) {
+      if (typeof window !== "undefined") {
+        const isStudentPath = window.location.pathname.startsWith("/student");
+        tokenService.clearSession();
+        window.location.href = isStudentPath ? "/auth/student-login" : "/auth/school-admin-login";
+      }
+      return Promise.reject(new Error(resData?.message || "Unauthorized session. Please log in again."));
+    }
+
+    const errorMessage = resData?.message || error.message || "An error occurred during API request.";
+    return Promise.reject(new Error(errorMessage));
   }
-
-  return resJson;
-}
+);
 
 export const api = {
-  get: (path: string, options?: RequestOptions) =>
-    apiFetch(path, { ...options, method: "GET" }),
-  post: (path: string, body?: any, options?: RequestOptions) =>
-    apiFetch(path, { ...options, method: "POST", body }),
-  put: (path: string, body?: any, options?: RequestOptions) =>
-    apiFetch(path, { ...options, method: "PUT", body }),
-  delete: (path: string, options?: RequestOptions) =>
-    apiFetch(path, { ...options, method: "DELETE" }),
+  get: (path: string, config?: any) => axiosInstance.get(path, config) as any,
+  post: (path: string, body?: any, config?: any) => axiosInstance.post(path, body, config) as any,
+  put: (path: string, body?: any, config?: any) => axiosInstance.put(path, body, config) as any,
+  delete: (path: string, config?: any) => axiosInstance.delete(path, config) as any,
 };

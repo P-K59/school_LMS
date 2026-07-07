@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard,
   Users,
@@ -24,27 +25,13 @@ export default function SchoolAdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [schoolName, setSchoolName] = useState("EduVerse School");
-  const [adminName, setAdminName] = useState("Administrator");
+  const { user, school, isAuthenticated, isLoading, logout } = useAuth();
 
   useEffect(() => {
-    const storedSchool = localStorage.getItem("school");
-    const storedUser = localStorage.getItem("user");
-
-    if (storedSchool) {
-      try {
-        const schoolObj = JSON.parse(storedSchool);
-        setSchoolName(schoolObj.name || "Apex Academy");
-      } catch (e) {}
+    if (!isLoading && !isAuthenticated) {
+      router.push("/auth/school-admin-login");
     }
-
-    if (storedUser) {
-      try {
-        const userObj = JSON.parse(storedUser);
-        setAdminName(`${userObj.firstName} ${userObj.lastName}`);
-      } catch (e) {}
-    }
-  }, []);
+  }, [isLoading, isAuthenticated, router]);
 
   const menuItems = [
     { name: "Dashboard", href: "/school-admin/dashboard", icon: LayoutDashboard },
@@ -58,11 +45,26 @@ export default function SchoolAdminLayout({
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("school");
-    router.push("/");
+    logout();
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-slate-300">
+        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Verifying Session Access...
+        </p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  const schoolName = school?.name || "EduVerse School";
+  const adminName = user ? `${user.firstName} ${user.lastName}` : "Administrator";
 
   return (
     <div className="flex min-h-screen bg-slate-900 text-slate-100 font-sans">
