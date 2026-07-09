@@ -18,7 +18,10 @@ import {
   Share2, 
   Sparkles, 
   X,
-  CheckCircle
+  CheckCircle,
+  School,
+  GraduationCap,
+  ArrowUpRight
 } from "lucide-react";
 import FooterGlow from "../components/ui/demo";
 import SpotlightCard from "../components/ui/spotlight-card";
@@ -215,48 +218,104 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="max-w-[1280px] mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl">
+          <div className="max-w-[1280px] mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl">
             
             {/* School Admin Card */}
-            <SpotlightCard className="p-8 gradient-border flex flex-col items-center text-center">
-              <div className="w-24 h-24 mb-6 relative portal-icon group-hover:scale-110 transition-transform duration-500 overflow-hidden rounded-full border border-white/5 bg-white/5">
-                <img 
-                  alt="School Admin Icon" 
-                  className="w-full h-full object-cover scale-[4] translate-x-[37%] translate-y-[37%]" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTYxDC5eltUMJo4mSmistuoh-UNMf3qarbV676x7A-hvpcHqoTUtwbvsYRWM-dvGj9_PYC7HtiTxWKQL4k5zaQ4FbyRKqmmnTMf927qK6Y7OJtCNSZ509AmFK14I3PfnNqBESljCX8-PRykWkjkfR-GOgEty7p16MxSocYV1gszrq5NSGfaHUXUxQRnhkE2hMF1-YarCrSSCog6bQtjLS1F036qdx-zfZgj4V32bNiGObJDidv4kRJKRqsbL_EXVO09JJ1WjTz2eY"
-                />
+            <SpotlightCard className="w-full max-w-[360px] mx-auto p-6 flex flex-col justify-between min-h-[480px] border border-white/5 relative overflow-hidden group">
+              {/* Header Bar */}
+              <div className="flex justify-between items-center w-full mb-6 z-10">
+                <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white">
+                  <School size={20} />
+                </div>
+                <Link 
+                  href="/auth/school-admin-login" 
+                  className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#8083ff] to-[#6f00be] flex items-center justify-center text-white hover:scale-110 transition-transform duration-300 shadow-[0_0_15px_rgba(128,131,255,0.3)]"
+                >
+                  <ArrowUpRight size={18} />
+                </Link>
               </div>
-              <h3 className="font-hanken font-bold text-xl text-white mb-2">School Admin</h3>
-              <p className="text-xs text-[#c7c4d7] mb-6 min-h-[36px] leading-relaxed">
-                Institutional settings, student registries, fee structures, exam setups, and teacher schedules.
-              </p>
-              <Link 
-                href="/auth/school-admin-login"
-                className="mt-auto w-full py-3 rounded-lg border border-[#c0c1ff]/20 text-[#c0c1ff] font-bold text-xs bg-[#c0c1ff]/5 hover:bg-[#c0c1ff] hover:text-[#07006c] hover:shadow-[0_0_15px_rgba(192,193,255,0.2)] transition-all duration-300 text-center"
-              >
-                Launch Portal
-              </Link>
+
+              {/* Centered Image Showcase */}
+              <div className="w-full aspect-[1.6] rounded-xl overflow-hidden mb-6 border border-white/5 relative group-hover:border-white/10 transition-colors z-10">
+                <img 
+                  alt="School Administration"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  src="https://images.unsplash.com/photo-1592066575517-58df903152f2?q=80&w=1298&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              </div>
+
+              {/* Title & Info */}
+              <div className="flex flex-col items-center text-center z-10">
+                <h3 className="font-hanken font-extrabold text-2xl bg-gradient-to-r from-[#c0c1ff] to-[#ddb7ff] bg-clip-text text-transparent mb-3 tracking-tight">
+                  SCHOOL ADMIN
+                </h3>
+                <p className="text-xs text-[#c7c4d7] mb-6 leading-relaxed max-w-[280px] font-medium font-hanken">
+                  Configure institutional registries, set course fee structures, manage student schedules, and review grades.
+                </p>
+              </div>
+
+              {/* Bottom Action Link */}
+              <div className="w-full flex justify-center mt-auto pt-2 z-10">
+                <Link 
+                  href="/auth/school-admin-login"
+                  className="text-xs font-bold text-white group-hover:text-[#c0c1ff] transition-colors flex items-center gap-1.5 font-hanken"
+                >
+                  Launch Portal <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+                </Link>
+              </div>
+
+              {/* Bottom Corner Glow */}
+              <div className="absolute -bottom-10 -right-10 w-28 h-28 bg-[#8083ff]/10 rounded-full blur-2xl group-hover:bg-[#8083ff]/20 transition-all duration-500 pointer-events-none" />
             </SpotlightCard>
 
             {/* Student Portal Card */}
-            <SpotlightCard className="p-8 gradient-border flex flex-col items-center text-center">
-              <div className="w-24 h-24 mb-6 relative portal-icon group-hover:scale-110 transition-transform duration-500 overflow-hidden rounded-full border border-white/5 bg-white/5">
-                <img 
-                  alt="Student Portal Icon" 
-                  className="w-full h-full object-cover scale-[4] translate-x-[-37%] translate-y-[37%]" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTYxDC5eltUMJo4mSmistuoh-UNMf3qarbV676x7A-hvpcHqoTUtwbvsYRWM-dvGj9_PYC7HtiTxWKQL4k5zaQ4FbyRKqmmnTMf927qK6Y7OJtCNSZ509AmFK14I3PfnNqBESljCX8-PRykWkjkfR-GOgEty7p16MxSocYV1gszrq5NSGfaHUXUxQRnhkE2hMF1-YarCrSSCog6bQtjLS1F036qdx-zfZgj4V32bNiGObJDidv4kRJKRqsbL_EXVO09JJ1WjTz2eY"
-                />
+            <SpotlightCard className="w-full max-w-[360px] mx-auto p-6 flex flex-col justify-between min-h-[480px] border border-white/5 relative overflow-hidden group">
+              {/* Header Bar */}
+              <div className="flex justify-between items-center w-full mb-6 z-10">
+                <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white">
+                  <GraduationCap size={20} />
+                </div>
+                <Link 
+                  href="/auth/student-login" 
+                  className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#8083ff] to-[#6f00be] flex items-center justify-center text-white hover:scale-110 transition-transform duration-300 shadow-[0_0_15px_rgba(128,131,255,0.3)]"
+                >
+                  <ArrowUpRight size={18} />
+                </Link>
               </div>
-              <h3 className="font-hanken font-bold text-xl text-white mb-2">Student Portal</h3>
-              <p className="text-xs text-[#c7c4d7] mb-6 min-h-[36px] leading-relaxed">
-                Video classes, interactive assessments, certification tracking, and performance feedback.
-              </p>
-              <Link 
-                href="/auth/student-login"
-                className="mt-auto w-full py-3 rounded-lg border border-[#c0c1ff]/20 text-[#c0c1ff] font-bold text-xs bg-[#c0c1ff]/5 hover:bg-[#c0c1ff] hover:text-[#07006c] hover:shadow-[0_0_15px_rgba(192,193,255,0.2)] transition-all duration-300 text-center"
-              >
-                Launch Portal
-              </Link>
+
+              {/* Centered Image Showcase */}
+              <div className="w-full aspect-[1.6] rounded-xl overflow-hidden mb-6 border border-white/5 relative group-hover:border-white/10 transition-colors z-10">
+                <img 
+                  alt="Student Learning Hub"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600&auto=format&fit=crop"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              </div>
+
+              {/* Title & Info */}
+              <div className="flex flex-col items-center text-center z-10">
+                <h3 className="font-hanken font-extrabold text-2xl bg-gradient-to-r from-[#3cd7ff] to-[#c0c1ff] bg-clip-text text-transparent mb-3 tracking-tight">
+                  STUDENT HUB
+                </h3>
+                <p className="text-xs text-[#c7c4d7] mb-6 leading-relaxed max-w-[280px] font-medium font-hanken">
+                  Access interactive virtual classrooms, take modules quizzes, download certificates, and view results.
+                </p>
+              </div>
+
+              {/* Bottom Action Link */}
+              <div className="w-full flex justify-center mt-auto pt-2 z-10">
+                <Link 
+                  href="/auth/student-login"
+                  className="text-xs font-bold text-white group-hover:text-[#3cd7ff] transition-colors flex items-center gap-1.5 font-hanken"
+                >
+                  Access Platform <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+                </Link>
+              </div>
+
+              {/* Bottom Corner Glow */}
+              <div className="absolute -bottom-10 -right-10 w-28 h-28 bg-[#3cd7ff]/10 rounded-full blur-2xl group-hover:bg-[#3cd7ff]/20 transition-all duration-500 pointer-events-none" />
             </SpotlightCard>
 
           </div>
