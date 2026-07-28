@@ -2,7 +2,7 @@ import { UserRole } from "@prisma/client";
 import slugify from "slugify";
 import ApiError from "../config/ApiError";
 import { prisma } from "../config/db";
-import { generateAccessToken, generateRefreshToken } from "../config/jwt";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../config/jwt";
 import { comparePassword, hashPassword } from "../config/password";
 import { LoginDto, RegisterSchoolDto } from "../dto/auth.dto";
 
@@ -203,24 +203,99 @@ class AuthService {
         };
     }
 
-    async refreshToken() { }
+    async refreshToken(token: string) {
 
-    async logout() { }
+        let decoded;
 
-    async getCurrentUser(userId: string) { 
+        try {
+            decoded = verifyRefreshToken(token);
+        } catch {
+            throw new ApiError(401, "Invalid or expired refresh token.");
+        }
+
+        const storedToken = await prisma.refreshToken.findUnique({
+            where: {
+                token,
+            },
+        });
+
+        if (!storedToken) {
+            throw new ApiError(401, "Invalid refresh token.");
+        }
+
+        if (storedToken.revoked) {
+            throw new ApiError(401, "Refresh token revoked.");
+        }
+
+        if (storedToken.expiresAt < new Date()) {
+            throw new ApiError(401, "Refresh token expired.");
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: decoded.userId,
+            },
+        });
+
+        if (!user) {
+            throw new ApiError(404, "User not found.");
+        }
+
+        if (user.status !== "ACTIVE") {
+            throw new ApiError(403, "Account is inactive.");
+        }
+
+        const payload = {
+            userId: user.id,
+            schoolId: user.schoolId,
+            role: user.role,
+        };
+
+        const accessToken = generateAccessToken(payload);
+
+        return {
+            accessToken,
+        };
+    }
+
+    async logout(token: string) {
+
+        const storedToken = await prisma.refreshToken.findUnique({
+            where: {
+                token,
+            },
+        });
+
+        if (!storedToken) {
+            return;
+        }
+
+        if (!storedToken.revoked) {
+            await prisma.refreshToken.update({
+                where: {
+                    token,
+                },
+                data: {
+                    revoked: true,
+                },
+            });
+        }
+    }
+
+    async getCurrentUser(userId: string) {
 
         // get the user
         const user = await prisma.user.findUnique({
-            where:{
+            where: {
                 id: userId,
             },
-            include:{
-                school:true
+            include: {
+                school: true
             }
         });
 
         // check user exists 
-        if(!user){
+        if (!user) {
             throw new ApiError(
                 404,
                 "User not found."
@@ -228,7 +303,7 @@ class AuthService {
         };
 
         // check user status
-        if(user.status !== "ACTIVE"){
+        if (user.status !== "ACTIVE") {
             throw new ApiError(
                 403,
                 "Account is inactive."
@@ -236,15 +311,76 @@ class AuthService {
         };
 
         // remove password
-        const {password, school,...userWithoutPassword} = user;
+        const { password, school, ...userWithoutPassword } = user;
 
-        return{
+        return {
             user: userWithoutPassword,
             school: school,
         }
     }
 
-    async changePassword() { }
+    async changePassword(
+        userId: string,
+        data: {
+            currentPassword: string;
+            newPassword: string;
+        }
+    ) {
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId,
+            },
+        });
+
+        if (!user) {
+            throw new ApiError(
+                404,
+                "User not found."
+            );
+        }
+
+        const isPasswordValid = await comparePassword(
+            data.currentPassword,
+            user.password
+        );
+
+        if (!isPasswordValid) {
+            throw new ApiError(
+                401,
+                "Current password is incorrect."
+            );
+        }
+
+        const hashedPassword = await hashPassword(
+            data.newPassword
+        );
+
+        await prisma.$transaction(async (tx) => {
+
+            await tx.user.update({
+                where: {
+                    id: user.id,
+                },
+                data: {
+                    password: hashedPassword,
+                },
+            });
+
+            await tx.refreshToken.updateMany({
+                where: {
+                    userId: user.id,
+                    revoked: false,
+                },
+                data: {
+                    revoked: true,
+                },
+            });
+
+        });
+
+        return;
+    }
 }
 
 export default new AuthService();

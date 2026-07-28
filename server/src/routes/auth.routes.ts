@@ -16,4 +16,24 @@ router.post("/login", authController.login);
 // @route GET /api/v1/auth/me
 router.get("/me",authenticate, authController.getCurrentUser);
 
+
+// @desc Refresh Access Token
+// @route POST /api/v1/auth/refresh
+router.post("/refresh", authController.refreshToken);
+
+// @desc Logout
+// @route POST /api/v1/auth/logout
+router.post(
+    "/logout",
+    authenticate,
+    authController.logout
+);
+
+
+router.patch(
+    "/change-password",
+    authenticate,
+    authController.changePassword
+);
+
 export default router;

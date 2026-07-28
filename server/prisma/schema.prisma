@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 enum SchoolStatus {
   ACTIVE
   INACTIVE
@@ -34,54 +33,146 @@ enum UserRole {
 }
 
 model School {
-  id String @id @default(uuid())
-  name String
-  slug String @unique
-  email String @unique
-  phone String?
-  logo String?
-  address String?
-  city String?
-  state String?
-  country String?
-  website String?
-  status SchoolStatus @default(ACTIVE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  users User[]
+  id        String       @id @default(uuid())
+  name      String
+  slug      String       @unique
+  email     String       @unique
+  phone     String?
+  logo      String?
+  address   String?
+  city      String?
+  state     String?
+  country   String?
+  website   String?
+  status    SchoolStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  users     User[]
+  courses   Course[]
   @@index([slug])
 }
 
 model User {
-  id String @id @default(uuid())
-  schoolId String?
-  firstName String
-  lastName String
-  email String @unique
-  password String
-  avatar String?
-  phone String?
-  role UserRole
-  status UserStatus @default(ACTIVE)
-  lastLogin DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  school School? @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  refreshTokens RefreshToken[]
+  id             String         @id @default(uuid())
+  schoolId       String?
+  firstName      String
+  lastName       String
+  email          String         @unique
+  password       String
+  avatar         String?
+  phone          String?
+  role           UserRole
+  status         UserStatus     @default(ACTIVE)
+  lastLogin      DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  school         School?        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  refreshTokens  RefreshToken[]
+  createdCourses Course[]       @relation("CreatedCourses")
+  enrollments Enrollment[]
   @@index([schoolId])
   @@index([role])
   @@index([status])
 }
 
 model RefreshToken {
-  id String @id @default(uuid())
-  token String @unique
+  id        String   @id @default(uuid())
+  token     String   @unique
   expiresAt DateTime
-  revoked Boolean @default(false)
+  revoked   Boolean  @default(false)
   ipAddress String?
   userAgent String?
   createdAt DateTime @default(now())
-  userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Course {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  thumbnail   String?
+  price       Float        @default(0)
+  status      CourseStatus @default(DRAFT)
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User   @relation("CreatedCourses", fields: [createdById], references: [id])
+
+  modules     Module[]
+  enrollments Enrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([schoolId])
+}
+
+model Module {
+  id String @id @default(uuid())
+
+  title String
+  order Int
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  lessons Lesson[]
+
+  createdAt DateTime @default(now())
+
+  @@index([courseId])
+}
+
+model Lesson {
+  id String @id @default(uuid())
+
+  title String
+
+  description String?
+
+  videoUrl String?
+
+  pdfUrl String?
+
+  duration Int?
+
+  order Int
+
+  isPreview Boolean @default(false)
+
+  moduleId String
+  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([moduleId])
+}
+
+model Enrollment {
+  id String @id @default(uuid())
+
+  userId   String
+  courseId String
+
+  progress Float @default(0)
+
+  completed Boolean @default(false)
+
+  enrolledAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
 }
