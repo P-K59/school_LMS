@@ -49,6 +49,7 @@ model School {
   updatedAt DateTime     @updatedAt
   users     User[]
   courses   Course[]
+
   @@index([slug])
 }
 
@@ -69,7 +70,11 @@ model User {
   school         School?        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   refreshTokens  RefreshToken[]
   createdCourses Course[]       @relation("CreatedCourses")
-  enrollments Enrollment[]
+  enrollments    Enrollment[]
+  studentId      String?        @unique
+
+  mustChangePassword Boolean @default(true)
+
   @@index([schoolId])
   @@index([role])
   @@index([status])
@@ -135,19 +140,19 @@ model Module {
 }
 
 model Lesson {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   title       String
   description String?
 
   videoUrl      String?
   videoFilename String?
 
-  pdfUrl        String?
-  pdfFilename   String?
+  pdfUrl      String?
+  pdfFilename String?
 
-  duration   Int?
-  isPreview  Boolean @default(false)
-  order       Int
+  duration  Int?
+  isPreview Boolean @default(false)
+  order     Int
 
   moduleId String
   module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)

@@ -124,34 +124,44 @@ class AuthService {
     // @access Public
     async login(data: LoginDto) {
 
-        // Check if user already exists
-        const user = await prisma.user.findUnique({
+        // Find user by email or student ID
+        const user = await prisma.user.findFirst({
             where: {
-                email: data.email,
+                OR: [
+                    {
+                        email: data.identifier,
+                    },
+                    {
+                        studentId: data.identifier,
+                    },
+                ],
             },
             include: {
                 school: true,
-            }
+            },
         });
 
         if (!user) {
             throw new ApiError(
                 401,
-                "Invalid email or password."
+                "Invalid credentials."
             );
         }
 
-        // check password is valid
-        const isPasswordValid = await comparePassword(data.password, user.password);
+        // Check password
+        const isPasswordValid = await comparePassword(
+            data.password,
+            user.password
+        );
 
         if (!isPasswordValid) {
             throw new ApiError(
                 401,
-                "Invalid email or password."
+                "Invalid credentials."
             );
         }
 
-        // check the user is ACTIVE
+        // Check account status
         if (user.status !== "ACTIVE") {
             throw new ApiError(
                 403,
@@ -163,15 +173,14 @@ class AuthService {
         const payload = {
             userId: user.id,
             schoolId: user.schoolId,
-            role: user.role
-        }
+            role: user.role,
+        };
 
-        // Generate access and refresh token
+        // Generate tokens
         const accessToken = generateAccessToken(payload);
-
         const refreshToken = generateRefreshToken(payload);
 
-        // save the refresh token
+        // Save refresh token
         await prisma.refreshToken.create({
             data: {
                 token: refreshToken,
@@ -180,24 +189,27 @@ class AuthService {
                     Date.now() + 7 * 24 * 60 * 60 * 1000
                 ),
                 revoked: false,
-            }
+            },
         });
 
-        // update last login
+        // Update last login
         await prisma.user.update({
             where: {
                 id: user.id,
             },
             data: {
                 lastLogin: new Date(),
-            }
+            },
         });
 
         const { password, school, ...userWithoutPassword } = user;
 
         return {
-            user: userWithoutPassword,
-            school: school,
+            user: {
+                ...userWithoutPassword,
+                mustChangePassword: user.mustChangePassword,
+            },
+            school,
             accessToken,
             refreshToken,
         };
@@ -309,14 +321,13 @@ class AuthService {
 
         return userWithoutPassword;
     }
-    
+
     async changePassword(
         userId: string,
-        data: {
-            currentPassword: string;
-            newPassword: string;
-        }
+        oldPassword: string,
+        newPassword: string
     ) {
+
         const user = await prisma.user.findUnique({
             where: {
                 id: userId,
@@ -324,19 +335,25 @@ class AuthService {
         });
 
         if (!user) {
-            throw new ApiError(404, "User not found.");
+            throw new ApiError(
+                404,
+                "User not found."
+            );
         }
 
         const isPasswordCorrect = await comparePassword(
-            data.currentPassword,
+            oldPassword,
             user.password
         );
 
         if (!isPasswordCorrect) {
-            throw new ApiError(400, "Current password is incorrect.");
+            throw new ApiError(
+                400,
+                "Old password is incorrect."
+            );
         }
 
-        const hashedPassword = await hashPassword(data.newPassword);
+        const hashedPassword = await hashPassword(newPassword);
 
         await prisma.user.update({
             where: {
@@ -344,11 +361,11 @@ class AuthService {
             },
             data: {
                 password: hashedPassword,
+                mustChangePassword: false,
             },
         });
 
         return {
-            success: true,
             message: "Password changed successfully.",
         };
     }

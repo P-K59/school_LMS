@@ -35,6 +35,8 @@ import moduleRoutes from "./routes/module.routes";
 import lessonRoutes from "./routes/lesson.routes";
 import enrollmentRoutes from "./routes/enrollment.routes";
 import uploadRoutes from "./routes/upload.routes";
+import userRoutes from "./routes/user.routes";
+import dashboardRoutes from "./routes/dashboard.routes";
 
 
 app.use("/api/v1/auth", authRoutes);
@@ -44,6 +46,8 @@ app.use("/api/v1/modules", moduleRoutes);
 app.use("/api/v1/lessons", lessonRoutes);
 app.use("/api/v1/enrollments", enrollmentRoutes);
 app.use("/api/v1/upload", uploadRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
 
 
 
