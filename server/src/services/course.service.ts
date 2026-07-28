@@ -5,7 +5,10 @@ import { CreateCourseDto, UpdateCourseDto } from "../dto/course.dto";
 
 class CourseService {
 
-    async createCourse(data: CreateCourseDto, user: Express.Request["user"]) {
+    async createCourse(
+        data: CreateCourseDto,
+        user: Express.Request["user"]
+    ) {
 
         const course = await prisma.course.create({
             data: {
@@ -16,6 +19,9 @@ class CourseService {
                 schoolId: user!.schoolId!,
                 createdById: user!.id,
             },
+            include: {
+                modules: true,
+            },
         });
 
         return course;
@@ -23,12 +29,29 @@ class CourseService {
 
     async getCourses(schoolId: string) {
 
-        return await prisma.course.findMany({
+        return prisma.course.findMany({
             where: {
                 schoolId,
             },
             include: {
-                modules: true,
+                modules: {
+                    include: {
+                        lessons: true,
+                    },
+                },
+                createdBy: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    },
+                },
+                _count: {
+                    select: {
+                        enrollments: true,
+                    },
+                },
             },
             orderBy: {
                 createdAt: "desc",
@@ -36,10 +59,74 @@ class CourseService {
         });
     }
 
-    async getCourse(id: string) {
+    async getCourse(id: string, schoolId?: string) {
 
-        const course = await prisma.course.findUnique({
-            where: { id },
+        const course = await prisma.course.findFirst({
+            where: {
+                id,
+                ...(schoolId && { schoolId }),
+            },
+            include: {
+                modules: {
+                    include: {
+                        lessons: true,
+                    },
+                },
+                createdBy: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    },
+                },
+                enrollments: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!course) {
+            throw new ApiError(404, "Course not found.");
+        }
+
+        return course;
+    }
+
+    async updateCourse(
+        id: string,
+        data: UpdateCourseDto,
+        schoolId?: string
+    ) {
+
+        const exists = await prisma.course.findFirst({
+            where: {
+                id,
+                ...(schoolId && { schoolId }),
+            },
+        });
+
+        if (!exists) {
+            throw new ApiError(404, "Course not found.");
+        }
+
+        return prisma.course.update({
+            where: {
+                id,
+            },
+            data: {
+                ...data,
+                status: data.status as CourseStatus | undefined,
+            },
             include: {
                 modules: {
                     include: {
@@ -48,47 +135,59 @@ class CourseService {
                 },
             },
         });
-
-        if (!course)
-            throw new ApiError(404, "Course not found.");
-
-        return course;
     }
 
-    async updateCourse(id: string, data: UpdateCourseDto) {
+    async deleteCourse(
+        id: string,
+        schoolId?: string
+    ) {
 
-        const exists = await prisma.course.findUnique({
-            where: { id },
+        const exists = await prisma.course.findFirst({
+            where: {
+                id,
+                ...(schoolId && { schoolId }),
+            },
         });
 
-        if (!exists)
+        if (!exists) {
             throw new ApiError(404, "Course not found.");
+        }
 
-        return await prisma.course.update({
-            where: { id },
+        await prisma.course.delete({
+            where: {
+                id,
+            },
+        });
+
+        return {
+            success: true,
+            message: "Course deleted successfully.",
+        };
+    }
+
+    async publishCourse(id: string) {
+
+        return prisma.course.update({
+            where: {
+                id,
+            },
             data: {
-                ...data,
-                status: data.status as CourseStatus | undefined,
+                status: CourseStatus.PUBLISHED,
             },
         });
     }
 
-    async deleteCourse(id: string) {
+    async archiveCourse(id: string) {
 
-        const exists = await prisma.course.findUnique({
-            where: { id },
+        return prisma.course.update({
+            where: {
+                id,
+            },
+            data: {
+                status: CourseStatus.ARCHIVED,
+            },
         });
-
-        if (!exists)
-            throw new ApiError(404, "Course not found.");
-
-        await prisma.course.delete({
-            where: { id },
-        });
-
-        return;
     }
-
 }
 
 export default new CourseService();

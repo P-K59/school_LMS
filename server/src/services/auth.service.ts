@@ -283,7 +283,6 @@ class AuthService {
     }
 
     async getCurrentUser(userId: string) {
-
         const user = await prisma.user.findUnique({
             where: {
                 id: userId,
@@ -308,10 +307,9 @@ class AuthService {
 
         const { password, ...userWithoutPassword } = user;
 
-        return {
-            user: userWithoutPassword,
-        };
+        return userWithoutPassword;
     }
+    
     async changePassword(
         userId: string,
         data: {

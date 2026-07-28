@@ -1,19 +1,46 @@
 import { Router } from "express";
-import * as courseController from "../controllers/course.controller";
+import { UserRole } from "@prisma/client";
+
+import {
+    createCourse,
+    getCourses,
+    getCourse,
+    updateCourse,
+    deleteCourse,
+    publishCourse,
+    archiveCourse,
+} from "../controllers/course.controller";
+
 import { authenticate } from "../middlewares/auth.middleware";
+import { authorize } from "../middlewares/role.middleware";
 
 const router = Router();
 
+// Authentication
 router.use(authenticate);
 
-router.post("/", courseController.createCourse);
+// All course routes require School Admin or Super Admin
+router.use(
+    authorize(
+        UserRole.SCHOOL_ADMIN,
+        UserRole.SUPER_ADMIN
+    )
+);
 
-router.get("/", courseController.getCourses);
+// CRUD
+router.post("/", createCourse);
 
-router.get("/:id", courseController.getCourse);
+router.get("/", getCourses);
 
-router.patch("/:id", courseController.updateCourse);
+router.get("/:id", getCourse);
 
-router.delete("/:id", courseController.deleteCourse);
+router.patch("/:id", updateCourse);
+
+router.delete("/:id", deleteCourse);
+
+// Course Status
+router.patch("/:id/publish", publishCourse);
+
+router.patch("/:id/archive", archiveCourse);
 
 export default router;

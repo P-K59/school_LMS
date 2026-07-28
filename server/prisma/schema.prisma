@@ -135,28 +135,25 @@ model Module {
 }
 
 model Lesson {
-  id String @id @default(uuid())
-
-  title String
-
+  id          String   @id @default(cuid())
+  title       String
   description String?
 
-  videoUrl String?
+  videoUrl      String?
+  videoFilename String?
 
-  pdfUrl String?
+  pdfUrl        String?
+  pdfFilename   String?
 
-  duration Int?
-
-  order Int
-
-  isPreview Boolean @default(false)
+  duration   Int?
+  isPreview  Boolean @default(false)
+  order       Int
 
   moduleId String
   module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
-
-  @@index([moduleId])
+  updatedAt DateTime @updatedAt
 }
 
 model Enrollment {
