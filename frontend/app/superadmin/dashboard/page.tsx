@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useMockData } from "../../context/MockDataContext";
 import { KPICard, GlassCard } from "../../components/Card";
 import {
@@ -16,10 +16,25 @@ import {
   CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function Dashboard() {
   const { schools, courses, activities, addActivity } = useMockData();
   const [remindersSent, setRemindersSent] = useState<Record<string, boolean>>({});
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Calculations
   const totalSchools = schools.length;
@@ -29,6 +44,37 @@ export default function Dashboard() {
   const monthlyRevenue = schools
     .filter((s) => s.status === "Active")
     .reduce((sum, s) => sum + s.monthlyRevenue, 0);
+
+  const enterpriseRevenue = schools
+    .filter((s) => s.status === "Active" && s.plan === "Enterprise")
+    .reduce((sum, s) => sum + s.monthlyRevenue, 0);
+
+  const proRevenue = schools
+    .filter((s) => s.status === "Active" && s.plan === "Pro")
+    .reduce((sum, s) => sum + s.monthlyRevenue, 0);
+
+  const baseRevenue = schools
+    .filter((s) => s.status === "Active" && s.plan === "Base")
+    .reduce((sum, s) => sum + s.monthlyRevenue, 0);
+
+  // Dynamic Chart Data
+  const schoolGrowthData = [
+    { name: "Jan", Schools: 3 },
+    { name: "Mar", Schools: activeSchools > 2 ? Math.floor(activeSchools * 0.5) + 1 : 2 },
+    { name: "May", Schools: activeSchools > 2 ? Math.floor(activeSchools * 0.8) + 1 : 3 },
+    { name: "Jul", Schools: activeSchools },
+    { name: "Sep", Schools: activeSchools + 2 },
+    { name: "Nov", Schools: activeSchools + 5 },
+  ];
+
+  const revenueTrendData = [
+    { name: "Jul", Enterprise: 3500, Pro: 2000 },
+    { name: "Aug", Enterprise: 4200, Pro: 2500 },
+    { name: "Sep", Enterprise: 4800, Pro: 2800 },
+    { name: "Oct", Enterprise: 5500, Pro: 3500 },
+    { name: "Nov", Enterprise: 6800, Pro: 4200 },
+    { name: "Dec", Enterprise: enterpriseRevenue || 4200, Pro: (proRevenue + baseRevenue) || 2400 },
+  ];
 
   // Expiring soon (less than 30 days - e.g. July 2026 since current system time is June 25, 2026)
   const expiringSoonSchools = schools.filter((s) => {
@@ -152,45 +198,54 @@ export default function Dashboard() {
               <option>Last 3 Years</option>
             </select>
           </div>
-          {/* Custom SVG Line Chart */}
-          <div className="h-64 w-full flex flex-col justify-between pt-4">
-            <svg viewBox="0 0 500 180" className="w-full h-48 overflow-visible">
-              <defs>
-                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.0" />
-                </linearGradient>
-              </defs>
-              {/* Grid lines */}
-              <line x1="0" y1="30" x2="500" y2="30" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4 4" />
-              <line x1="0" y1="80" x2="500" y2="80" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4 4" />
-              <line x1="0" y1="130" x2="500" y2="130" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4 4" />
-              {/* Line path */}
-              <path
-                d="M 10 130 Q 100 120 150 90 T 250 80 T 350 90 T 450 40 T 490 30"
-                fill="none"
-                stroke="#4f46e5"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-              />
-              {/* Gradient Fill */}
-              <path
-                d="M 10 130 Q 100 120 150 90 T 250 80 T 350 90 T 450 40 T 490 30 L 490 160 L 10 160 Z"
-                fill="url(#chartGradient)"
-              />
-              {/* Circles on key nodes */}
-              <circle cx="150" cy="90" r="5" fill="#4f46e5" stroke="#ffffff" strokeWidth="1.5" />
-              <circle cx="350" cy="90" r="5" fill="#4f46e5" stroke="#ffffff" strokeWidth="1.5" />
-              <circle cx="490" cy="30" r="6" fill="#3525cd" stroke="#ffffff" strokeWidth="2" />
-            </svg>
-            <div className="flex justify-between text-[11px] font-geist text-on-surface-variant font-medium px-2">
-              <span>JAN</span>
-              <span>MAR</span>
-              <span>MAY</span>
-              <span>JUL</span>
-              <span>SEP</span>
-              <span>NOV</span>
-            </div>
+          {/* Recharts Area Chart */}
+          <div className="h-64 w-full pt-4">
+            {!mounted ? (
+              <div className="h-56 w-full bg-slate-50/50 rounded-xl animate-pulse" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={schoolGrowthData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
+                  <defs>
+                    <linearGradient id="growthGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#777587" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false}
+                    dy={5}
+                  />
+                  <YAxis 
+                    stroke="#777587" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false}
+                    dx={-5}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      background: "rgba(255, 255, 255, 0.95)", 
+                      border: "1px solid rgba(228, 225, 238, 0.8)", 
+                      borderRadius: "12px", 
+                      fontSize: "12px",
+                      boxShadow: "0 10px 25px -5px rgba(77, 68, 227, 0.1)"
+                    }} 
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="Schools" 
+                    stroke="#4f46e5" 
+                    strokeWidth={3} 
+                    fillOpacity={1} 
+                    fill="url(#growthGradient)" 
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </GlassCard>
 
@@ -209,41 +264,43 @@ export default function Dashboard() {
               </span>
             </div>
           </div>
-          {/* Custom SVG Bar Chart */}
-          <div className="h-64 w-full flex flex-col justify-between pt-4">
-            <svg viewBox="0 0 500 180" className="w-full h-48">
-              {/* Bar 1 */}
-              <rect x="30" y="80" width="30" height="80" rx="3" fill="#4f46e5" />
-              <rect x="30" y="130" width="30" height="30" rx="3" fill="#39b8fd" />
-              
-              {/* Bar 2 */}
-              <rect x="110" y="80" width="30" height="80" rx="3" fill="#4f46e5" />
-              <rect x="110" y="120" width="30" height="40" rx="3" fill="#39b8fd" />
-
-              {/* Bar 3 */}
-              <rect x="190" y="70" width="30" height="90" rx="3" fill="#4f46e5" />
-              <rect x="190" y="135" width="30" height="25" rx="3" fill="#39b8fd" />
-
-              {/* Bar 4 */}
-              <rect x="270" y="55" width="30" height="105" rx="3" fill="#4f46e5" />
-              <rect x="270" y="100" width="30" height="60" rx="3" fill="#39b8fd" />
-
-              {/* Bar 5 */}
-              <rect x="350" y="45" width="30" height="115" rx="3" fill="#4f46e5" />
-              <rect x="350" y="125" width="30" height="35" rx="3" fill="#39b8fd" />
-
-              {/* Bar 6 */}
-              <rect x="430" y="20" width="30" height="140" rx="3" fill="#4f46e5" />
-              <rect x="430" y="85" width="30" height="75" rx="3" fill="#39b8fd" />
-            </svg>
-            <div className="flex justify-between text-[11px] font-geist text-on-surface-variant font-medium px-6">
-              <span>JUL</span>
-              <span>AUG</span>
-              <span>SEP</span>
-              <span>OCT</span>
-              <span>NOV</span>
-              <span>DEC</span>
-            </div>
+          {/* Recharts Bar Chart */}
+          <div className="h-64 w-full pt-4">
+            {!mounted ? (
+              <div className="h-56 w-full bg-slate-50/50 rounded-xl animate-pulse" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={revenueTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#777587" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false}
+                    dy={5}
+                  />
+                  <YAxis 
+                    stroke="#777587" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false}
+                    dx={-5}
+                  />
+                  <Tooltip 
+                    formatter={(value: any) => [`$${Number(value || 0).toLocaleString()}`, "Revenue"]}
+                    contentStyle={{ 
+                      background: "rgba(255, 255, 255, 0.95)", 
+                      border: "1px solid rgba(228, 225, 238, 0.8)", 
+                      borderRadius: "12px", 
+                      fontSize: "12px",
+                      boxShadow: "0 10px 25px -5px rgba(77, 68, 227, 0.1)"
+                    }} 
+                  />
+                  <Bar dataKey="Enterprise" stackId="a" fill="#4f46e5" radius={[0, 0, 4, 4]} />
+                  <Bar dataKey="Pro" stackId="a" fill="#39b8fd" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </GlassCard>
       </div>

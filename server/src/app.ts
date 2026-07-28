@@ -54,3 +54,7 @@ app.all(
     });
   }
 );
+
+// global error handler
+app.use(errorHandler);
+

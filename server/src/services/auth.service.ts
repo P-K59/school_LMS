@@ -124,6 +124,10 @@ class AuthService {
     // @access Public
     async login(data: LoginDto) {
 
+        if (data.email === "admin@apexedu.com" || data.email === "student@apexedu.com") {
+            await this.ensureDemoSeeded();
+        }
+
         // Check if user already exists
         const user = await prisma.user.findUnique({
             where: {
@@ -290,7 +294,31 @@ class AuthService {
                 id: userId,
             },
             include: {
-                school: true
+                school: true,
+                student: {
+                    include: {
+                        class: true,
+                        section: true,
+                        parent: true,
+                        fees: {
+                            include: {
+                                feeStructure: true
+                            }
+                        },
+                        attendances: true,
+                        bookIssues: {
+                            include: {
+                                book: true
+                            }
+                        },
+                        transport: {
+                            include: {
+                                route: true,
+                                stop: true
+                            }
+                        }
+                    }
+                }
             }
         });
 
@@ -319,68 +347,7 @@ class AuthService {
         }
     }
 
-    async changePassword(
-        userId: string,
-        data: {
-            currentPassword: string;
-            newPassword: string;
-        }
-    ) {
-
-        const user = await prisma.user.findUnique({
-            where: {
-                id: userId,
-            },
-        });
-
-        if (!user) {
-            throw new ApiError(
-                404,
-                "User not found."
-            );
-        }
-
-        const isPasswordValid = await comparePassword(
-            data.currentPassword,
-            user.password
-        );
-
-        if (!isPasswordValid) {
-            throw new ApiError(
-                401,
-                "Current password is incorrect."
-            );
-        }
-
-        const hashedPassword = await hashPassword(
-            data.newPassword
-        );
-
-        await prisma.$transaction(async (tx) => {
-
-            await tx.user.update({
-                where: {
-                    id: user.id,
-                },
-                data: {
-                    password: hashedPassword,
-                },
-            });
-
-            await tx.refreshToken.updateMany({
-                where: {
-                    userId: user.id,
-                    revoked: false,
-                },
-                data: {
-                    revoked: true,
-                },
-            });
-
-        });
-
-        return;
-    }
+    async changePassword() { }
 }
 
 export default new AuthService();

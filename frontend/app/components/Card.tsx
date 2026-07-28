@@ -22,7 +22,7 @@ export const KPICard: React.FC<KPICardProps> = ({
   variant = "default",
 }) => {
   const gradientStyles = {
-    default: "bg-white dark:bg-zinc-900 border-outline-variant/30",
+    default: "bg-white border-outline-variant/30",
     indigo: "bg-gradient-to-br from-white to-purple-50/30 border-purple-100",
     blue: "bg-gradient-to-br from-white to-blue-50/30 border-blue-100",
     emerald: "bg-gradient-to-br from-white to-emerald-50/30 border-emerald-100",

@@ -1,6 +1,7 @@
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import { UserRole } from "@prisma/client"
 import { env } from "./env";
+import { randomUUID } from "crypto";
 
 export interface JwtPayload {
     userId: string;
@@ -24,6 +25,7 @@ export const generateRefreshToken = (payload: JwtPayload): string => {
         env.JWT_REFRESH_SECRET as Secret,
         {
             expiresIn: env.JWT_REFRESH_EXPIRES,
+            jwtid: randomUUID(),
         } as SignOptions
     );
 };
