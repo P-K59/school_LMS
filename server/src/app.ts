@@ -23,6 +23,7 @@ app.use(cors({
 // importing routes
 import authRoutes from "./routes/auth.routes";
 import courseRoutes from "./routes/course.routes";
+import { errorHandler } from "./middlewares/error.middleware";
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/courses", courseRoutes);

@@ -124,10 +124,6 @@ class AuthService {
     // @access Public
     async login(data: LoginDto) {
 
-        if (data.email === "admin@apexedu.com" || data.email === "student@apexedu.com") {
-            await this.ensureDemoSeeded();
-        }
-
         // Check if user already exists
         const user = await prisma.user.findUnique({
             where: {
@@ -288,66 +284,76 @@ class AuthService {
 
     async getCurrentUser(userId: string) {
 
-        // get the user
         const user = await prisma.user.findUnique({
             where: {
                 id: userId,
             },
             include: {
                 school: true,
-                student: {
+                enrollments: {
                     include: {
-                        class: true,
-                        section: true,
-                        parent: true,
-                        fees: {
-                            include: {
-                                feeStructure: true
-                            }
-                        },
-                        attendances: true,
-                        bookIssues: {
-                            include: {
-                                book: true
-                            }
-                        },
-                        transport: {
-                            include: {
-                                route: true,
-                                stop: true
-                            }
-                        }
-                    }
-                }
-            }
+                        course: true,
+                    },
+                },
+            },
         });
 
-        // check user exists 
         if (!user) {
-            throw new ApiError(
-                404,
-                "User not found."
-            )
-        };
+            throw new ApiError(404, "User not found.");
+        }
 
-        // check user status
         if (user.status !== "ACTIVE") {
-            throw new ApiError(
-                403,
-                "Account is inactive."
-            );
-        };
+            throw new ApiError(403, "Account is inactive.");
+        }
 
-        // remove password
-        const { password, school, ...userWithoutPassword } = user;
+        const { password, ...userWithoutPassword } = user;
 
         return {
             user: userWithoutPassword,
-            school: school,
-        }
+        };
     }
+    async changePassword(
+        userId: string,
+        data: {
+            currentPassword: string;
+            newPassword: string;
+        }
+    ) {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId,
+            },
+        });
 
-    async changePassword() { }
+        if (!user) {
+            throw new ApiError(404, "User not found.");
+        }
+
+        const isPasswordCorrect = await comparePassword(
+            data.currentPassword,
+            user.password
+        );
+
+        if (!isPasswordCorrect) {
+            throw new ApiError(400, "Current password is incorrect.");
+        }
+
+        const hashedPassword = await hashPassword(data.newPassword);
+
+        await prisma.user.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                password: hashedPassword,
+            },
+        });
+
+        return {
+            success: true,
+            message: "Password changed successfully.",
+        };
+    }
 }
 
 export default new AuthService();
