@@ -188,6 +188,34 @@ class CourseService {
             },
         });
     }
+
+    async getPublishedCourses(schoolId: string) {
+
+        return prisma.course.findMany({
+            where: {
+                schoolId,
+                status: CourseStatus.PUBLISHED,
+            },
+            include: {
+                createdBy: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                    },
+                },
+                _count: {
+                    select: {
+                        modules: true,
+                        enrollments: true,
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+    }
 }
 
 export default new CourseService();

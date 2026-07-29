@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 
 import catchAsync from "../config/catchAsync";
-import UserService from "../services/user.service";
+import userService from "../services/user.service";
 
-const userService = new UserService();
 
 class UserController {
 

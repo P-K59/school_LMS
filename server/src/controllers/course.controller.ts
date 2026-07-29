@@ -112,3 +112,17 @@ export const archiveCourse: RequestHandler = catchAsync(async (req, res) => {
         data: course,
     });
 });
+
+export const getPublishedCourses: RequestHandler = catchAsync(async (req, res) => {
+
+    const courses = await courseService.getPublishedCourses(
+        req.user!.schoolId!
+    );
+
+    res.status(200).json({
+        success: true,
+        count: courses.length,
+        data: courses,
+    });
+
+});

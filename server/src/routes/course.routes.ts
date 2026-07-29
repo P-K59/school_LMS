@@ -9,6 +9,7 @@ import {
     deleteCourse,
     publishCourse,
     archiveCourse,
+    getPublishedCourses,
 } from "../controllers/course.controller";
 
 import { authenticate } from "../middlewares/auth.middleware";
@@ -18,6 +19,11 @@ const router = Router();
 
 // Authentication
 router.use(authenticate);
+
+router.get(
+    "/catalog",
+        getPublishedCourses
+);
 
 // All course routes require School Admin or Super Admin
 router.use(

@@ -30,10 +30,6 @@ class DashboardService {
 
             this.getRecentLogins(schoolId),
 
-            this.getStudentRegistrationGraph(schoolId),
-
-            this.getEnrollmentGraph(schoolId),
-
         ]);
 
         return {
@@ -367,6 +363,8 @@ class DashboardService {
         });
 
     }
+
+    
 
     async getStudentDashboard(userId: string) {
 

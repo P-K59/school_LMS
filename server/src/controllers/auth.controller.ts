@@ -109,7 +109,8 @@ export const changePassword: RequestHandler = catchAsync(async (req, res) => {
 
     await authService.changePassword(
         req.user!.id,
-        req.body
+        req.body.oldPassword,
+        req.body.newPassword
     );
 
     clearRefreshTokenCookie(res);
