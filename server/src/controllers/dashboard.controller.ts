@@ -1,26 +1,48 @@
-import { Request, Response } from "express";
-
+import ApiError from "../config/ApiError";
 import catchAsync from "../config/catchAsync";
 import dashboardService from "../services/dashboard.service";
 
-class DashboardController {
 
-    getAdminDashboard = catchAsync(
-        async (req: Request, res: Response) => {
+export const getAdminDashboard = catchAsync(async (req, res) => {
 
-            const dashboard = await dashboardService.getAdminDashboard(
-                req.user.schoolId
-            );
+    if (!req.user) {
+        throw new ApiError(401, "Unauthorized");
+    }
 
-            res.status(200).json({
-                success: true,
-                message: "Dashboard fetched successfully.",
-                data: dashboard,
-            });
+    const schoolId = req.user.schoolId;
 
-        }
+    if (!schoolId) {
+        throw new ApiError(401, "Unauthorized");
+    }
+
+    const dashboard = await dashboardService.getAdminDashboard(
+        schoolId
     );
 
-}
+    res.status(200).json({
+        success: true,
+        message: "Admin dashboard fetched successfully.",
+        data: dashboard,
+    });
 
-export default new DashboardController();
+});
+
+export const getStudentDashboard = catchAsync(async (req, res) => {
+
+    if (!req.user) {
+        throw new ApiError(401, "Unauthorized");
+    }
+
+    const userId = req.user.id;
+
+    const dashboard = await dashboardService.getStudentDashboard(
+        userId
+    );
+
+    res.status(200).json({
+        success: true,
+        message: "Student dashboard fetched successfully.",
+        data: dashboard,
+    });
+
+});
