@@ -1,4 +1,4 @@
-# 🏫 School LMS Nirmaan — Next-Gen Multi-Tenant Learning Management System
+# 🏫 School LMS Nirmaan
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)
@@ -7,185 +7,155 @@
 ![Prisma](https://img.shields.io/badge/Prisma-v6-blueviolet)
 ![License](https://img.shields.io/badge/license-ISC-orange)
 
-> **School LMS Nirmaan** is an enterprise-grade, highly scalable, multi-tenant Learning Management System (LMS) engineered to streamline school administration, academic tracking, communication, and digital learning workflows across educational institutions.
+School LMS Nirmaan is a multi-tenant learning management system designed for schools that need a modern digital platform for administration, course delivery, student management, and progress tracking.
 
 ---
 
-## 🏛️ Executive Summary & Key Highlights
+## ✨ What This Project Includes
 
-Built with a modular clean architecture and strict type safety, **School LMS Nirmaan** enables seamless multi-school tenant management. It empowers school administrators, teachers, students, parents, and administrative staff with tailored portals and role-specific capabilities.
+The current implementation covers a production-style backend for the LMS with:
 
-### Key Architecture & Technical Pillars
-- 🏢 **Multi-Tenant Architecture**: Automatic slugification and isolated tenant environments supporting scalable multi-school operations.
-- 🔐 **Dual-Token Enterprise Security**: Implements JWT Access Tokens coupled with secure, `HttpOnly` Refresh Token cookies and Redis session invalidation support.
-- 👥 **Granular Role-Based Access Control (RBAC)**: Built-in support for **10 distinct system roles** (Super Admin, School Admin, Principal, Vice Principal, Teacher, Accountant, Librarian, Receptionist, Student, Parent).
-- ⚙️ **Clean Layered Backend**: Strict separation of concerns adhering to the Controller-Service-DTO pattern, powered by Express, TypeScript, and Prisma ORM.
-- ⚡ **Modern Next.js 16 App Router Frontend**: High-performance client experience utilizing React 19, Tailwind CSS v4, and Lucide React.
-- 🛡️ **Atomic Data Operations**: Multi-table operations wrapped in Prisma database transactions ensuring zero data inconsistency during tenant onboarding.
+- Multi-tenant school onboarding and school-admin registration
+- JWT-based authentication with refresh token support
+- Role-based access control for Super Admin, School Admin, and Student
+- Course, module, and lesson management
+- Student enrollment and progress tracking
+- File uploads for images, videos, and PDFs
+- Admin and student dashboard data APIs
 
 ---
 
-## 🛠️ Technology Stack
+## 🧱 Tech Stack
 
-| Domain | Tech Stack & Frameworks |
+| Layer | Stack |
 | :--- | :--- |
-| **Backend Runtime** | Node.js, Express.js, TypeScript |
-| **Database & ORM** | PostgreSQL, Prisma ORM (v6) |
-| **Caching & Mailer** | Redis (`ioredis`), Nodemailer, EJS Templates |
-| **Authentication & Security** | JSON Web Tokens (`jsonwebtoken`), `bcryptjs`, `cookie-parser`, CORS |
-| **Frontend Framework** | Next.js 16 (App Router), React 19, TypeScript |
-| **Styling & UI** | Tailwind CSS v4, PostCSS, Lucide React |
+| Backend | Node.js, Express.js, TypeScript |
+| Database | PostgreSQL, Prisma ORM |
+| Auth | JWT, bcryptjs, cookie-parser |
+| File Uploads | Multer |
+| Frontend | Next.js, React, Tailwind CSS |
 
 ---
 
-## 📁 Repository Structure
+## 📁 Project Structure
 
-```
+```text
 school_lms_nirmaan/
-├── 📄 README.md                # Executive Project Documentation
-├── 📂 server/                  # Backend RESTful API Service
-│   ├── 📄 API.md               # Detailed Frontend Integration API Docs
-│   ├── 📄 server.ts            # HTTP Server Entry Point
-│   ├── 📂 prisma/              # Database Schema & Migrations
-│   │   └── 📄 schema.prisma    # Prisma Models (School, User, RefreshToken)
-│   └── 📂 src/
-│       ├── 📄 app.ts           # Express Application Configuration
-│       ├── 📂 config/          # Environment, DB & Response Wrapper Utilities
-│       ├── 📂 controllers/     # HTTP Request Handlers
-│       ├── 📂 dto/             # Data Transfer Objects & Interfaces
-│       ├── 📂 middlewares/     # Authentication & Error Middlewares
-│       ├── 📂 routes/          # Express Router Definitions
-│       ├── 📂 services/        # Core Business Logic & DB Transactions
-│       └── 📂 utils/           # Cookie & Helper Functions
-└── 📂 frontend/                # Next.js 16 Web Application
-    ├── 📄 package.json         # Frontend Dependencies & Scripts
-    └── 📂 app/                 # Next.js App Router Pages & Components
+├── README.md
+├── server/
+│   ├── API.md
+│   ├── package.json
+│   ├── server.ts
+│   ├── prisma/
+│   │   └── schema.prisma
+│   └── src/
+│       ├── app.ts
+│       ├── config/
+│       ├── controllers/
+│       ├── dto/
+│       ├── middlewares/
+│       ├── routes/
+│       ├── services/
+│       └── utils/
+└── frontend/
+    ├── package.json
+    └── app/
 ```
 
 ---
 
-## 🔄 System Architecture & Data Flow
+## 🔐 Backend API Highlights
 
-```mermaid
-flowchart TD
-    Client[Client Browser / Next.js Frontend]
-    Middleware[Auth & Verification Middleware]
-    Controller[Auth Controller]
-    Service[Auth Service]
-    DB[(PostgreSQL DB via Prisma)]
-    Redis[(Redis Cache / Refresh Tokens)]
+The backend exposes REST APIs under the base path:
 
-    Client -->|POST /api/v1/auth/login| Controller
-    Client -->|GET /api/v1/auth/me + Bearer Token| Middleware
-    Middleware -->|Verified User ID| Controller
-    Controller -->|Delegates Logic| Service
-    Service -->|Atomic Transaction / Query| DB
-    Service -->|Store Refresh Token| Redis
-    Service -->|Return JWT + HttpOnly Cookie| Client
-```
+- /api/v1/auth
+- /api/v1/courses
+- /api/v1/modules
+- /api/v1/lessons
+- /api/v1/users
+- /api/v1/enrollments
+- /api/v1/upload
+- /api/v1/dashboard
 
----
+These routes support the full lifecycle of:
 
-## 🔑 Database Schema & Role Management Overview
-
-The application utilizes PostgreSQL managed via Prisma. Key models include:
-
-### 1. `School` (Tenant Model)
-Captures institutional metadata (Name, Unique Slug, Email, Phone, Logo, Address, Status).
-
-### 2. `User` (Identity Model)
-Supports individual accounts with role-based access:
-- **System Roles (`UserRole`)**: `SUPER_ADMIN`, `SCHOOL_ADMIN`, `PRINCIPAL`, `VICE_PRINCIPAL`, `TEACHER`, `ACCOUNTANT`, `LIBRARIAN`, `RECEPTIONIST`, `STUDENT`, `PARENT`.
-- **Status Lifecycles (`UserStatus`)**: `ACTIVE`, `INACTIVE`, `BLOCKED`.
-
-### 3. `RefreshToken` (Security Token Model)
-Tracks active sessions, device metadata (`ipAddress`, `userAgent`), expiration dates, and revocation states.
+- school registration
+- login and session recovery
+- course publishing and archiving
+- lesson delivery and media upload
+- student creation and management
+- enrollment and progress updates
 
 ---
 
-## 🚀 Getting Started & Local Setup
+## 🚀 Getting Started
 
-### Prerequisites
-- **Node.js**: `v18.x` or higher
-- **PostgreSQL**: Local instance or cloud database (e.g., Supabase, Neon)
-- **Redis**: Local server or Upstash Redis instance
+### 1. Prerequisites
 
-### 1. Clone the Repository
+- Node.js 18+
+- PostgreSQL
+- npm
+
+### 2. Backend Setup
+
 ```bash
-git clone https://github.com/your-org/school_lms_nirmaan.git
-cd school_lms_nirmaan
-```
-
-### 2. Backend Setup (`server`)
-```bash
-# Navigate to server directory
 cd server
-
-# Install dependencies
 npm install
-
-# Create environment file (.env)
 cp .env.example .env
 ```
 
-Configure your `.env` variables in `server/.env`:
+Update the environment variables in the server .env file:
+
 ```env
 PORT=5000
 NODE_ENV=development
 ORIGIN=http://localhost:3000
 DATABASE_URL="postgresql://user:password@localhost:5432/school_lms?schema=public"
-JWT_ACCESS_SECRET=your_super_secret_access_key
-JWT_REFRESH_SECRET=your_super_secret_refresh_key
+JWT_ACCESS_SECRET=your_access_secret
+JWT_REFRESH_SECRET=your_refresh_secret
 ```
 
-Run database migrations and start development server:
+Run Prisma migrations and start the backend:
+
 ```bash
-# Run Prisma Migrations
 npx prisma migrate dev --name init
-
-# Start dev server with auto-reload
 npm run dev
 ```
 
-### 3. Frontend Setup (`frontend`)
+### 3. Frontend Setup
+
 ```bash
-# Open a new terminal and navigate to frontend
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start Next.js development server
 npm run dev
 ```
-The application will be accessible at `http://localhost:3000`.
+
+Open http://localhost:3000 to view the app.
 
 ---
 
-## 📖 API Documentation
+## 📘 API Documentation
 
-Detailed frontend integration specifications, including request/response schemas, payload data types, and required headers are available in the dedicated documentation file:
-👉 **[Server API Documentation (API.md)](file:///d:/engineering-coding/projects/school_lms_nirmaan/server/API.md)**
+Frontend developers can use the complete API reference here:
+
+- [server/API.md](server/API.md)
+
+The documentation includes endpoint-by-endpoint details, request and response examples, authentication notes, and frontend usage guidance.
 
 ---
 
-## 🛣️ Roadmap & Upcoming Features
+## 🛣️ Roadmap
 
-- [x] **Phase 1: Core Foundation & Multi-Tenant Onboarding**
-  - [x] School registration with automated slug generation.
-  - [x] Dual-token authentication with HttpOnly cookie handling.
-  - [x] Centralized error and response management framework.
-- [ ] **Phase 2: Academic & Class Management**
-  - [ ] Class, section, and subject mapping modules.
-  - [ ] Timetable builder and teacher assignment.
-- [ ] **Phase 3: Student & Parent Portals**
-  - [ ] Attendance tracking & leave requests.
-  - [ ] Gradebook, exams, and report card generation.
-- [ ] **Phase 4: Administrative & Financial Suite**
-  - [ ] Fee structure management & online payment gateway integration.
-  - [ ] Library tracking and payroll operations.
+- [x] School registration and admin onboarding
+- [x] Authentication and authorization flow
+- [x] Course, module, lesson, and upload APIs
+- [x] Student enrollment and progress tracking
+- [ ] Advanced attendance and gradebook modules
+- [ ] Parent and teacher-specific portals
+- [ ] Payments and fee management
 
 ---
 
 ## 📄 License
-This project is licensed under the **ISC License**.
+
+This project is licensed under the ISC License.
