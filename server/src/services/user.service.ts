@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from "@prisma/client";
+import { Prisma, UserRole, UserStatus } from "@prisma/client";
 import { randomBytes } from "crypto";
 
 import ApiError from "../config/ApiError";
@@ -7,6 +7,7 @@ import { hashPassword } from "../config/password";
 
 import {
     CreateStudentDto,
+    UpdateStudentDto,
 } from "../dto/user.dto";
 
 class UserService {
@@ -124,7 +125,7 @@ class UserService {
 
         const search = query.search?.trim();
 
-        const where = {
+        const where: Prisma.UserWhereInput = {
             schoolId,
             role: UserRole.STUDENT,
 
@@ -133,25 +134,25 @@ class UserService {
                     {
                         firstName: {
                             contains: search,
-                            mode: "insensitive",
+                            mode: "insensitive" as const,
                         },
                     },
                     {
                         lastName: {
                             contains: search,
-                            mode: "insensitive",
+                            mode: "insensitive" as const,
                         },
                     },
                     {
                         email: {
                             contains: search,
-                            mode: "insensitive",
+                            mode: "insensitive" as const,
                         },
                     },
                     {
                         studentId: {
                             contains: search,
-                            mode: "insensitive",
+                            mode: "insensitive" as const,
                         },
                     },
                 ],

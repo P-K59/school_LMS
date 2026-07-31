@@ -4,7 +4,7 @@ import ApiError from "../config/ApiError";
 
 class UploadService {
 
-    uploadVideo(file: Express.Multer.File) {
+    uploadVideo(file: any) {
 
         if (!file) {
             throw new ApiError(400, "Video is required.");
@@ -19,7 +19,7 @@ class UploadService {
         };
     }
 
-    uploadPdf(file: Express.Multer.File) {
+    uploadPdf(file: any) {
 
         if (!file) {
             throw new ApiError(400, "PDF is required.");
@@ -34,7 +34,7 @@ class UploadService {
         };
     }
 
-    uploadImage(file: Express.Multer.File) {
+    uploadImage(file: any) {
 
         if (!file) {
             throw new ApiError(400, "Image is required.");

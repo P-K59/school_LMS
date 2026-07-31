@@ -5,7 +5,7 @@ import uploadService from "../services/upload.service";
 export const uploadVideo: RequestHandler = catchAsync(async (req, res) => {
 
     const result = uploadService.uploadVideo(
-        req.file as Express.Multer.File
+        (req as any).file
     );
 
     res.status(201).json({
@@ -18,7 +18,7 @@ export const uploadVideo: RequestHandler = catchAsync(async (req, res) => {
 export const uploadPdf: RequestHandler = catchAsync(async (req, res) => {
 
     const result = uploadService.uploadPdf(
-        req.file as Express.Multer.File
+        (req as any).file
     );
 
     res.status(201).json({
@@ -31,7 +31,7 @@ export const uploadPdf: RequestHandler = catchAsync(async (req, res) => {
 export const uploadImage: RequestHandler = catchAsync(async (req, res) => {
 
     const result = uploadService.uploadImage(
-        req.file as Express.Multer.File
+        (req as any).file
     );
 
     res.status(201).json({

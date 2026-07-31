@@ -49,11 +49,24 @@ export default function StudentDashboard() {
     { rank: 5, name: "Riya Sen", xp: 190, avatar: "🐨" },
   ];
 
+  const [dashboardData, setDashboardData] = useState<any>(null);
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push("/auth/student-login");
+    } else if (isAuthenticated) {
+      loadStudentData();
     }
   }, [isLoading, isAuthenticated, router]);
+
+  const loadStudentData = async () => {
+    try {
+      const res = await api.get("/dashboard/student");
+      setDashboardData(res.data);
+    } catch (err) {
+      console.log("Using local student dashboard fallback", err);
+    }
+  };
 
   const handleLogout = () => {
     logout();

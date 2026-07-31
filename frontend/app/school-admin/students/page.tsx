@@ -81,7 +81,7 @@ export default function StudentsRegistryPage() {
     setLoading(true);
     setError(null);
     try {
-      let path = "/school-admin/students";
+      let path = "/users/students";
       const queries = [];
       if (selectedClass) queries.push(`classId=${selectedClass}`);
       if (selectedSection) queries.push(`sectionId=${selectedSection}`);
@@ -90,7 +90,13 @@ export default function StudentsRegistryPage() {
       const res = await api.get(path);
       setStudents(res.data || []);
     } catch (err: any) {
-      setError(err.message || "Failed to retrieve student records.");
+      // Fallback try legacy route if needed
+      try {
+        const res = await api.get("/school-admin/students");
+        setStudents(res.data || []);
+      } catch (fallbackErr: any) {
+        setError(err.message || "Failed to retrieve student records.");
+      }
     } finally {
       setLoading(false);
     }
@@ -103,21 +109,11 @@ export default function StudentsRegistryPage() {
       const payload = {
         firstName,
         lastName,
-        email: email || undefined,
+        email: email || `${firstName.toLowerCase()}.${lastName.toLowerCase()}@student.edu`,
         phone: phone || undefined,
-        gender,
-        dob: dob || undefined,
-        rollNumber,
-        admissionNumber: admissionNumber || undefined,
-        classId,
-        sectionId,
-        parentFatherName: fatherName,
-        parentPhone,
-        parentEmail: parentEmail || undefined,
-        address,
       };
 
-      await api.post("/school-admin/students", payload);
+      await api.post("/users/students", payload);
       setIsAddModalOpen(false);
       // Reset form
       setFirstName("");

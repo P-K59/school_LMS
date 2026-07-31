@@ -19,11 +19,3 @@ export interface UpdateStudentDto {
     phone?: string;
     status?: "ACTIVE" | "INACTIVE";
 }
-
-export interface UpdateStudentDto {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    phone?: string;
-    status?: "ACTIVE" | "INACTIVE";
-}

@@ -4,7 +4,7 @@ import catchAsync from "../config/catchAsync";
 
 // Dashboard
 export const getDashboard: RequestHandler = catchAsync(async (req, res) => {
-    const schoolId = req.user!.schoolId;
+    const schoolId = req.user!.schoolId!;
 
     const data = await adminService.getDashboard(schoolId);
 

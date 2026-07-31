@@ -14,11 +14,11 @@ const createStorage = (folder: string) => {
 
     return multer.diskStorage({
 
-        destination(req, file, cb) {
+        destination(req: any, file: any, cb: any) {
             cb(null, destination);
         },
 
-        filename(req, file, cb) {
+        filename(req: any, file: any, cb: any) {
             const extension = path.extname(file.originalname);
             cb(null, `${uuid()}${extension}`);
         },
@@ -47,7 +47,7 @@ export const uploadVideo = multer({
     limits: {
         fileSize: 500 * 1024 * 1024, // 500 MB
     },
-    fileFilter(req, file, cb) {
+    fileFilter(req: any, file: any, cb: any) {
 
         if (!videoTypes.includes(file.mimetype)) {
             return cb(new ApiError(400, "Only video files are allowed."));
@@ -62,7 +62,7 @@ export const uploadPdf = multer({
     limits: {
         fileSize: 20 * 1024 * 1024,
     },
-    fileFilter(req, file, cb) {
+    fileFilter(req: any, file: any, cb: any) {
 
         if (!pdfTypes.includes(file.mimetype)) {
             return cb(new ApiError(400, "Only PDF files are allowed."));
@@ -77,7 +77,7 @@ export const uploadImage = multer({
     limits: {
         fileSize: 10 * 1024 * 1024,
     },
-    fileFilter(req, file, cb) {
+    fileFilter(req: any, file: any, cb: any) {
 
         if (!imageTypes.includes(file.mimetype)) {
             return cb(new ApiError(400, "Only image files are allowed."));

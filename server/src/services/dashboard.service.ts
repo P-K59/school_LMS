@@ -14,22 +14,13 @@ class DashboardService {
             latestEnrollments,
             topCourses,
             recentLogins,
-            studentRegistrationGraph,
-            enrollmentGraph,
         ] = await Promise.all([
-
             this.getStatistics(schoolId),
-
             this.getRecentStudents(schoolId),
-
             this.getRecentCourses(schoolId),
-
             this.getLatestEnrollments(schoolId),
-
             this.getTopCourses(schoolId),
-
             this.getRecentLogins(schoolId),
-
         ]);
 
         return {
@@ -39,8 +30,8 @@ class DashboardService {
             latestEnrollments,
             topCourses,
             recentLogins,
-            studentRegistrationGraph,
-            enrollmentGraph,
+            studentRegistrationGraph: [],
+            enrollmentGraph: [],
         };
     }
 

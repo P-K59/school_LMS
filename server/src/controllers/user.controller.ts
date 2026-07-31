@@ -10,7 +10,7 @@ class UserController {
         async (req: Request, res: Response) => {
 
             const student = await userService.createStudent(
-                req.user.schoolId,
+                req.user!.schoolId!,
                 req.body
             );
 
@@ -27,8 +27,8 @@ class UserController {
         async (req: Request, res: Response) => {
 
             const students = await userService.getStudents(
-                req.user.schoolId,
-                req.query
+                req.user!.schoolId!,
+                req.query as any
             );
 
             res.status(200).json({
@@ -44,7 +44,7 @@ class UserController {
         async (req: Request, res: Response) => {
 
             const student = await userService.getStudent(
-                req.user.schoolId,
+                req.user!.schoolId!,
                 req.params.id
             );
 
@@ -61,7 +61,7 @@ class UserController {
         async (req: Request, res: Response) => {
 
             const student = await userService.updateStudent(
-                req.user.schoolId,
+                req.user!.schoolId!,
                 req.params.id,
                 req.body
             );
@@ -79,7 +79,7 @@ class UserController {
         async (req: Request, res: Response) => {
 
             const result = await userService.deleteStudent(
-                req.user.schoolId,
+                req.user!.schoolId!,
                 req.params.id
             );
 

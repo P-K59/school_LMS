@@ -8,9 +8,13 @@ const mustChangePassword = async (
     next: NextFunction
 ) => {
 
+    if (!req.user) {
+        throw new ApiError(401, "Unauthorized");
+    }
+
     const user = await prisma.user.findUnique({
         where: {
-            id: req.user.userId,
+            id: req.user.id,
         },
         select: {
             mustChangePassword: true,
